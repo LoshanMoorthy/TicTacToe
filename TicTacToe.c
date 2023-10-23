@@ -7,12 +7,12 @@ char board[3][3];
 const char PLAYER = 'X';
 const char COMPUTER = 'O';
 
-void resetBoard();
-void printBoard();
-int checkFreeSpaces();
-void playerMove();
-void computerMove();
-char checkWinner();
+void resetBoard(char*** board);
+void printBoard(char** board);
+int checkFreeSpaces(char** board);
+void playerMove(char** board);
+void computerMove(char** board);
+char checkWinner(char** board);
 void printWinner(char);
 
 int main()
@@ -24,48 +24,53 @@ int main()
     {
         winner = ' ';
         response = ' ';
-        resetBoard();
+        char** board = NULL;
+        resetBoard(&board);
 
-        while (winner == ' ' && checkFreeSpaces() != 0)
+        while (winner == ' ' && checkFreeSpaces(board) != 0)
         {
-            printBoard();
+            printBoard(board);
 
-            computerMove();
-            winner = checkWinner();
-            if (winner != ' ' || checkFreeSpaces == 0)
+            computerMove(board);
+            winner = checkWinner(board);
+            if (winner != ' ' || checkFreeSpaces(board) == 0)
                 break;
 
-            playerMove();
-            winner = checkWinner();
-            if (winner != ' ' || checkFreeSpaces == 0)
+            playerMove(board);
+            winner = checkWinner(board);
+            if (winner != ' ' || checkFreeSpaces(board) == 0)
                 break;
         }
 
-        printBoard();
+        printBoard(board);
         printWinner(winner);    
 
         printf("\nWould yo like to play again? (Y/N): ");
         scanf("%c");
         scanf("%c", &response);
         response = toupper(response);
+        free(board[0]);
+        free(board);
     } while (response == 'Y');
 
     printf("Thanks for playing !");
     return 0;
 }
 
-void resetBoard()
+void resetBoard(char*** board)
 {
+    *board = (char**)malloc(3 * sizeof(char*));
     for (int i = 0; i < 3; i++)
     {
+        (*board)[i] = (char*)malloc(3 * sizeof(char));
         for (int j = 0; j < 3; j++)
         {
-            board[i][j] = ' ';
+            (*board)[i][j] = ' ';
         }
     }
 }
 
-void printBoard()
+void printBoard(char** board)
 {
     printf(" %c | %c | %c", board[0][0], board[0][1], board[0][2]);
     printf("\n---|---|---\n");
@@ -75,24 +80,20 @@ void printBoard()
     printf("\n");
 }
 
-int checkFreeSpaces()
+int checkFreeSpaces(char** board)
 {
     int freeSpaces = 9;
     for (int i = 0; i < 3; i++)
-    {
         for (int j = 0; j < 3; j++)
-        {
             if (board[i][j] != ' ')
                 freeSpaces--;
-        }
-    }
+    
     return freeSpaces;
 }
 
-void playerMove()
+void playerMove(char** board)
 {
-    int x;
-    int y;
+    int x, y;
 
     do
     {
@@ -116,14 +117,14 @@ void playerMove()
     } while (board[x][y] != ' ');
 }
 
-void computerMove()
+void computerMove(char** board)
 {
     // Creates a seed based on current time
     srand(time(0));
     int x;
     int y;
 
-    if (checkFreeSpaces() > 0)
+    if (checkFreeSpaces(board) > 0)
     {
         do
         {
@@ -137,7 +138,7 @@ void computerMove()
         printWinner(' ');
 }
 
-char checkWinner()
+char checkWinner(char** board)
 {
     // Check rows
     for (int i = 0; i < 3; i++)
@@ -153,7 +154,7 @@ char checkWinner()
     if (board[0][0] == board[1][1] && board[0][0] == board[2][2])
         return board[0][0];
 
-    if (board[0][2] == board[1][1] && board[0][0] == board[2][0])
+    if (board[0][2] == board[1][1] && board[0][2] == board[2][0])
         return board[0][2];
 
     return ' ';
